@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import SDWebImage
+import CoreLocation
 
 class HomeViewController: UIViewController {
     @IBOutlet weak var tableViewHome : UITableView!
@@ -13,17 +15,53 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var lbeStatus : UILabel!
     @IBOutlet weak var imgUser : UIImageView!
     @IBOutlet weak var mySwitch : UISwitch!
-
+    
+    var locationManager: CLLocationManager?
+    var locationUpdateTimer: Timer?
+    static let geoCoderOnline = CLGeocoder()
+    var strAddress = ""
+    var lat = "0.0"
+    var long = "0.0"
+ 
     override func viewDidLoad() {
         super.viewDidLoad()
         mySwitch.addTarget(self, action: #selector(switchToggled(_:)), for: .valueChanged)
+        
+        locationManager = CLLocationManager()
+        locationManager?.delegate = self
+        locationManager?.activityType = .automotiveNavigation
+        locationManager?.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        locationManager?.distanceFilter = 100.0
+        
+        locationManager?.allowsBackgroundLocationUpdates = true
+        locationManager?.showsBackgroundLocationIndicator = true
+        
+        locationManager?.requestWhenInUseAuthorization()
+        locationManager?.requestAlwaysAuthorization()
+        locationManager?.startUpdatingLocation()
+       // requestLocationUpdate()
 
     }
     
     override func viewWillAppear(_ animated: Bool) {
         self.navigationController?.navigationBar.isHidden = true
+        stopLocationUpdate()
         getProfileAPI()
     }
+    
+    private func requestLocationUpdate() {
+        
+        locationUpdateTimer = Timer.scheduledTimer(withTimeInterval: 35, repeats: true) { [weak self] _ in
+            self?.sendCurrentLocation()
+        }
+    }
+    
+    private func stopLocationUpdate() {
+        locationUpdateTimer?.invalidate()
+        locationUpdateTimer = nil
+    }
+    
+  
     
     @IBAction func Menu_Action(_ sender: Any) {
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "SideMenuUpdate"), object: nil)
@@ -62,20 +100,55 @@ class HomeViewController: UIViewController {
 
                         }
                         self.lbeName.text = retrievedDriver.driverName
-                        var urlString = retrievedDriver.driverImage.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                        
+                        var urlString = retrievedDriver.driverImage.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
                         urlString =  GlobalConstants.BASE_IMAGE_URL + urlString
                         
                         self.imgUser?.sd_setImage(with: URL.init(string:(urlString)),
                                                placeholderImage: UIImage(named: "placeholder_Male"),
                                                options: .refreshCached,
                                                completed: nil)
+                        
+                        if retrievedDriver.loadFleetDetailId > 0 {
+                            self.requestLocationUpdate()
+                            self.sendCurrentLocation()
+                        }
+                        else{
+                            self.stopLocationUpdate()
+                        }
                     }
-                    
                 }
             }
         }
     }
     
+    
+    func sendCurrentLocation() {
+        if UserDefaults.standard.bool(forKey: Constants.login) {
+            if let retrievedDriver = getDriverDetails() {
+                if retrievedDriver.loadFleetDetailId > 0 {
+                    if typeDelivered == "PickedUp" {
+                        let params = [
+                            "loadFleetDetailId": retrievedDriver.loadFleetDetailId,
+                            "status": "InTransit",
+                            "currentLat" : self.lat,
+                            "currentLong": self.long,
+                            "address": self.strAddress,
+                        ] as [String : Any]
+                        
+                        UpdateLoadTrackingStatusRequest.shared.UpdateLoadTrackingStatusAPI(requestParams: params) { (obj, message, success,Verification) in
+                            
+                        }
+                    }
+                    else{
+                        stopLocationUpdate()
+                    }
+                }
+            }
+        }else{
+            stopLocationUpdate()
+        }
+    }
     @objc func switchToggled(_ sender: UISwitch) {
             if sender.isOn {
                 UpdateDriverAvailability(true)
@@ -94,18 +167,74 @@ class HomeViewController: UIViewController {
     func UpdateDriverAvailability(_ isAvailable:Bool)
     {
         
-        let params = [
-                        "driverId": userId(),
-                        "isAvailable": isAvailable,
-                        ] as [String : Any]
+        let params = [ "driverId": userId(),
+                       "isAvailable": isAvailable,
+                     ] as [String : Any]
            
      
         UpdateDriverAvailabilityRequest.shared.UpdateDriverAvailabilityAPI(requestParams: params) { (obj, message, success,Verification) in
             NotificationAlert().NotificationAlert(titles: message ?? "isAvailable")
+            if success {
+                
+            }
+        }
+    }
     
+    
+    
+}
+
+extension HomeViewController: CLLocationManagerDelegate {
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Failed to get location: \(error.localizedDescription)")
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .notDetermined:
+            print("Location permission not determined")
+        case .restricted:
+            print("Location permission restricted")
+        case .denied:
+            print("Location permission denied")
+        case .authorizedWhenInUse, .authorizedAlways:
+            print("Location permission granted")
+        default:
+            print("default")
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
+        {
+            guard let location = locations.first else {
+                return
+            }
+        
+            DispatchQueue.main.async {
+                
+            HomeViewController.geoCoderOnline.reverseGeocodeLocation(location, completionHandler: { (placemarks, _) -> Void in
+     
+                        placemarks?.forEach { (placemark) in
+                            if let city = placemark.locality {
+                                self.strAddress = placemark.name ?? ""
+                                self.strAddress = self.strAddress + " " + city
+                                print(self.strAddress)
+                            }
+                        }
+                    })
+                
+                if let locationData = locations.last {
+                    self.lat = String(locationData.coordinate.latitude)
+                    self.long = String(locationData.coordinate.longitude)
+                    
+                    UserDefaults.standard.set(self.lat, forKey: "latitude_current")
+                    UserDefaults.standard.set(self.long, forKey: "longitude_current")
+                }
             }
         }
 }
+
 extension HomeViewController: UITableViewDataSource,UITableViewDelegate {
     
     
@@ -116,7 +245,7 @@ extension HomeViewController: UITableViewDataSource,UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
         
         
-        return 3
+        return 4
         
     }
     
@@ -127,17 +256,21 @@ extension HomeViewController: UITableViewDataSource,UITableViewDelegate {
         
         if indexPath.row == 0
         {
-            cell.lbeName.text = "View Assigned Loads"
+            cell.lbeName.text = "Active Load"
         }
         if indexPath.row == 1
         {
-            cell.lbeName.text = "Update Profile"
+            cell.lbeName.text = "Active Load Fuel Receipts"
+
         }
         if indexPath.row == 2
         {
-            cell.lbeName.text = "Purchased Fuel Receipts"
+            cell.lbeName.text = "Update Profile"
         }
-        
+        if indexPath.row == 3
+        {
+            cell.lbeName.text = "My Fleet"
+        }
         return cell
         
     }
@@ -154,23 +287,41 @@ extension HomeViewController: UITableViewDataSource,UITableViewDelegate {
         if indexPath.row == 0 {
             let storyBoard = UIStoryboard.init(name: "Home", bundle: nil)
             let controller = (storyBoard.instantiateViewController(withIdentifier: "AssignedViewController") as?  AssignedViewController)!
-            controller.titleStr = "Assigned"
+            controller.titleStr = "Active Load"
             self.parent?.navigationController?.pushViewController(controller, animated: true)
         }
         if indexPath.row == 1
         {
-            
+            if let retrievedDriver = getDriverDetails() {
+                if retrievedDriver.loadFleetDetailId == 0 {
+                    return
+                }
+                
+                let storyBoard = UIStoryboard.init(name: "Home", bundle: nil)
+                let controller = (storyBoard.instantiateViewController(withIdentifier: "PurchaseFuelListViewController") as?  PurchaseFuelListViewController)!
+                controller.fleetId = retrievedDriver.fleetId
+                controller.loadId = retrievedDriver.loadId
+
+                controller.IsActive = 1
+                self.parent?.navigationController?.pushViewController(controller, animated: true)
+                
+            }
+        }
+        
+        if indexPath.row == 2
+        {
+
             let storyBoard = UIStoryboard.init(name: "Home", bundle: nil)
             let controller = (storyBoard.instantiateViewController(withIdentifier: "UpdateProfileViewController") as?  UpdateProfileViewController)!
             controller.titleStr = "Update Profile"
             self.parent?.navigationController?.pushViewController(controller, animated: true)
         }
         
-        if indexPath.row == 2
+        if indexPath.row == 3
         {
-            
-            let storyBoard = UIStoryboard.init(name: "Home", bundle: nil)
-            let controller = (storyBoard.instantiateViewController(withIdentifier: "PurchaseFuelListViewController") as?  PurchaseFuelListViewController)!
+
+            let storyBoard = UIStoryboard.init(name: "Fleet", bundle: nil)
+            let controller = (storyBoard.instantiateViewController(withIdentifier: "MyFleetViewController") as?  MyFleetViewController)!
             self.parent?.navigationController?.pushViewController(controller, animated: true)
         }
         

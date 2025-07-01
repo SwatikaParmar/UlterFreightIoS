@@ -45,7 +45,8 @@ class UILabelX: UILabel {
         var calculatedFontSize = screenWidth / 375 * FontSize
         
         if Utility.shared.DivceTypeString() == "IPad" {
-            calculatedFontSize = calculatedFontSize + 5
+            calculatedFontSize = FontSize + 5
+
         }
        
         self.font = UIFont(name: fontName, size: calculatedFontSize)

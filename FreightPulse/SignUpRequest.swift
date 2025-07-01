@@ -268,7 +268,7 @@ class LoginAPIRequest: NSObject {
                     }
                     else
                     {
-                            completion(nil, messageString, status,emailConfirmed,lastScreenId,"", "")
+                            completion(nil, messageString,status,emailConfirmed,lastScreenId,"", "")
                     }
                 }
                 else

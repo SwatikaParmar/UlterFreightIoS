@@ -39,7 +39,6 @@ class AlamofireRequest: NSObject {
                     request.httpBody = jsonString.data(using: .utf8)
                     
                     AF.request(request).responseData { response in
-                        debugPrint(response)
                         if isLoader{
                             Indicator.shared.stopAnimating()
                         }
@@ -391,9 +390,6 @@ class AlamofireRequest: NSObject {
             
             multipartFormData.append(data!, withName: key, fileName:name, mimeType: "image/jpeg")
             
-            
-            
-            
         },to: URL.init(string: urlString)!, usingThreshold: UInt64.init(),
                   method: .post,
                   headers: headers).response{ response in
@@ -415,7 +411,7 @@ class AlamofireRequest: NSObject {
                 }
             }
             else{
-                print(response.error)
+                print(response.error ?? "")
                 callback("failure",nil)
 
             }
@@ -476,6 +472,82 @@ class AlamofireRequest: NSObject {
             }
         }
     }
+    
+    func uploadAddFuelReceipt(parameters : [String : Any], image:UIImage,name:String,file:String,userID:Int, callback:@escaping (_ data: String?, _ isError: Bool ) -> Void){
+            Indicator.shared.startAnimating(withMessage:"", colorType: UIColor.white, colorText:UIColor.white)
+     
+            let data = image.jpegData(compressionQuality: 0.5)
+            
+    
+            let urlString = "BaseURL".AddOrUpdateFuelReceipt
+            let token = accessToken()
+            let bearer : String = "Bearer \(token )"
+            let headers: HTTPHeaders
+            headers = ["Content-type": "multipart/form-data",
+                       "Content-Disposition" : "form-data",
+                       "Authorization": bearer]
+            
+            AF.upload(multipartFormData: { (multipartFormData) in
+                
+                for (key, value) in parameters {
+                    if let intValue = value as? Int {
+                        multipartFormData.append("\(intValue)".data(using: .utf8)!, withName: key)
+                    }
+                    else if let intValue = value as? Double {
+                        multipartFormData.append("\(intValue)".data(using: .utf8)!, withName: key)
+                    }
+                    else if let stringValue = value as? String {
+                        multipartFormData.append(stringValue.data(using: .utf8)!, withName: key)
+                    }
+                }
+                
+                
+                if data != nil{
+                    multipartFormData.append(data!, withName:file, fileName:name, mimeType: "image/jpeg")
+                }
+                
+            },to: URL.init(string: urlString)!, usingThreshold: UInt64.init(),
+                      method: .post,
+                      headers: headers).response{ response in
+                
+                if((response.error == nil)){
+                    do{
+                        if let jsonData = response.data{
+                            
+                            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                                            print("Response JSON String: \(jsonString)")
+                                        } else {
+                                            print("Failed to convert data to string.")
+                                        }
+                            
+                            let parsedData = try JSONSerialization.jsonObject(with: jsonData) as! Dictionary<String, AnyObject>
+                            print(parsedData)
+                            
+                            let isSuccess = parsedData["isSuccess"] as? Int
+                            if isSuccess == 1 {
+                                Indicator.shared.stopAnimating()
+                                callback("Fuel receipt updated successfully.", true )
+                            }
+                            else{
+                                Indicator.shared.stopAnimating()
+                                print(response.error ?? "failure")
+
+                                callback("Something went wrong",false)
+                            }
+                        }
+                    }catch{
+                        print(response.error ?? "failure")
+                        Indicator.shared.stopAnimating()
+                        callback("Something went wrong",false)
+                    }
+                }
+                else{
+                    print(response.error ?? "failure")
+                    Indicator.shared.stopAnimating()
+                    callback("Something went wrong",false)
+                }
+            }
+        }
     // MARK: - SessionEnd
 
     func SessionEnd(code:Int)
@@ -513,27 +585,55 @@ class AlamofireRequest: NSObject {
         }
 }
 
-class Indicator: NSObject , NVActivityIndicatorViewable {
-        var activityData = ActivityData()
+
+class Indicator: NSObject {
         static let shared = Indicator()
-    
-    func startAnimating(withMessage : String, colorType : UIColor, colorText : UIColor) {
-        
-        var colorBg = UIColor()
-        colorBg = UIColor(red: 0, green: 0, blue: 0, alpha: 0.20)
-        activityData = ActivityData(size: CGSize(width: 60, height: 60),
-                                    message: withMessage,
-                                    messageFont: UIFont.systemFont(ofSize: 16.0, weight: .regular),
-                                    type: NVActivityIndicatorType.ballPulse,
-                                    color: AppColor.AppThemeColor,
-                                    padding: 0,
-                                    displayTimeThreshold: NVActivityIndicatorView.DEFAULT_BLOCKER_DISPLAY_TIME_THRESHOLD,
-                                    minimumDisplayTime: NVActivityIndicatorView.DEFAULT_BLOCKER_MINIMUM_DISPLAY_TIME,
-                                    backgroundColor: colorBg,
-                                    textColor: UIColor.white)
-        NVActivityIndicatorPresenter.sharedInstance.startAnimating(self.activityData, nil)
+        var activityIndicator: NVActivityIndicatorView!
+        var loadingOverlay: UIView?
+ 
+        func startAnimating(withMessage : String, colorType : UIColor, colorText : UIColor) {
+ 
+            if let window = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .first?.windows
+                .first(where: \.isKeyWindow) {
+ 
+                let frame = CGRect(x: (window.bounds.width - 60) / 2,
+                                           y: (window.bounds.height - 60) / 2,
+                                           width: 60,
+                                           height: 60)
+                activityIndicator = NVActivityIndicatorView(frame: frame,
+                                                             type: .ballPulse,
+                                                             color: AppColor.AppThemeColor,
+                                                             padding: 0)
+                
+                let overlay = UIView(frame: window.bounds)
+                    overlay.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.25)
+                    overlay.isUserInteractionEnabled = true
+                    overlay.tag = 999
+                
+                if loadingOverlay != nil {
+                    loadingOverlay?.removeFromSuperview()
+                    loadingOverlay = nil
+                }
+                overlay.addSubview(activityIndicator)
+                window.addSubview(overlay)
+                loadingOverlay = overlay
+                activityIndicator.startAnimating()
+        }
     }
-        func stopAnimating(){
-            NVActivityIndicatorPresenter.sharedInstance.stopAnimating(nil)
+    
+    
+    func stopAnimating(){
+        
+        if loadingOverlay != nil {
+            loadingOverlay?.removeFromSuperview()
+            loadingOverlay = nil
+        }
+        
+        if activityIndicator != nil {
+            activityIndicator.stopAnimating()
+        }
+        
     }
 }

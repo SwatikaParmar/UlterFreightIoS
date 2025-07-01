@@ -7,6 +7,8 @@
 
 import UIKit
 import LGSideMenuController
+import SDWebImage
+
 class MenuUserController: UIViewController,UITableViewDelegate,UITableViewDataSource{
     
     @IBOutlet weak var imgLocation: UIImageView!
@@ -27,8 +29,8 @@ class MenuUserController: UIViewController,UITableViewDelegate,UITableViewDataSo
         self.versionLbl.text = Utility.shared.appVersion() + "(\(Utility.shared.appBuildVersion()))"
        
         
-        titleArray = ["Home","My Orders","Privacy Policy","About Us","Log Out"]
-        imagesArray = ["oneImage","myOrder","Privacy","About","Log"]
+        titleArray = ["Home","Privacy Policy","About Us","Log Out"]
+        imagesArray = ["oneImage","Privacy","About","Log"]
         
         tableview.contentInsetAdjustmentBehavior = .never
         
@@ -39,9 +41,14 @@ class MenuUserController: UIViewController,UITableViewDelegate,UITableViewDataSo
     
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         if let retrievedDriver = getDriverDetails() {
             print("Retrieved Driver Name: \(retrievedDriver.driverName)")
             self.lbeName.text = retrievedDriver.driverName
+            
+            let imagePath = retrievedDriver.driverImage
+            print("Raw image path: \(imagePath)")
+            
             var urlString = retrievedDriver.driverImage.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
             urlString =  GlobalConstants.BASE_IMAGE_URL + urlString
             
@@ -122,11 +129,11 @@ class MenuUserController: UIViewController,UITableViewDelegate,UITableViewDataSo
     {
         let alert = UIAlertController(title: nil, message:"Are you sure you want to logout?", preferredStyle: .alert)
         
-        let No = UIAlertAction(title:"No", style: .default, handler: { action in
+        let No = UIAlertAction(title:"No", style: UIAlertAction.Style.destructive, handler: { action in
         })
             alert.addAction(No)
         
-        let Yes = UIAlertAction(title:"Yes", style: UIAlertAction.Style.destructive, handler: { action in
+        let Yes = UIAlertAction(title:"Yes", style: .default, handler: { action in
             self.callLogOutApi()
          
         })

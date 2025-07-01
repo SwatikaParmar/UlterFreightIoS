@@ -46,7 +46,8 @@ class ViewController: UIViewController {
         txt_Phone.placeholder = "Phone number"
         txt_Phone.keyboardType = .phonePad
         txt_Phone.font = UIFont(name: FontName.Inter.Medium, size: 15.5)!
-
+                
+        
         applyStyle(to: txt_Phone)
 
     }

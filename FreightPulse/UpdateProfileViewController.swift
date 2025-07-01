@@ -304,9 +304,7 @@ class UpdateProfileViewController: UIViewController ,CountriesSelectDelegate {
             return
            }
         
-        if emailCont.isValidEmail() {
-        }
-        else{
+        if !emailCont.isValidEmail() {
             self.MessageAlertError(message: "Please enter valid contact email address")
             return
         }
@@ -434,7 +432,7 @@ class UpdateProfileViewController: UIViewController ,CountriesSelectDelegate {
     }
     
     func addPickerLastServiceDate(){
-        let alert = UIAlertController(style: .alert, title: "Select Date")
+        let alert = UIAlertController(style: .alert, title: "Select Last Service Date")
         alert.view.subviews.first?.subviews.first?.subviews.first?.backgroundColor = UIColor.white
         
         alert.setTitle(font: UIFont(name: FontName.Inter.Medium, size: 14)!, color: AppColor.AppThemeColor)
@@ -486,6 +484,7 @@ class UpdateProfileViewController: UIViewController ,CountriesSelectDelegate {
                 if ((data?.isEmpty) == nil){
                     self.isImageUpload = true
                     self.isImageGallery = true
+                    self.MessageAlertError(message: "Your profile picture was uploaded successfully.")
 
                 }
             }

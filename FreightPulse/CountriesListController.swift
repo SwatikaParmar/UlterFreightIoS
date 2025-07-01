@@ -31,8 +31,10 @@ protocol CountriesSelectDelegate {
         var delegate : CountriesSelectDelegate!
         var searchText = ""
         var countryID = 0
+        var isJurisdictions = false
 
-       
+        var allJurisdictionsListData : [JurisdictionsListData] = []
+        var jurisdictionsListDataArray : [JurisdictionsListData] = []
         
         func topViewLayout(){
                if CountriesListController.hasSafeArea{
@@ -55,16 +57,17 @@ protocol CountriesSelectDelegate {
         override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(true)
             self.navigationController?.isNavigationBarHidden = true
-            
-            if countryID == 0 {
-                GetCategoryListDataGet(true, true)
+            if isJurisdictions {
+                GetAllJurisdictionsAPIRequestData(true, false)
             }
             else{
-                GetStateListDataGet(true, true)
-
-                
+                if countryID == 0 {
+                    GetCategoryListDataGet(true, true)
+                }
+                else{
+                    GetStateListDataGet(true, true)
+                }
             }
-           
         }
         
         
@@ -99,6 +102,23 @@ protocol CountriesSelectDelegate {
             }
         }
         
+        func GetAllJurisdictionsAPIRequestData(_ isLoader:Bool, _ isAppend: Bool){
+        
+            GetAllJurisdictionsAPIRequest.shared.JurisdictionsListAPI(requestParams:0, isLoader) { (message,status,dictionary) in
+                if status {
+                    if dictionary != nil{
+                        self.jurisdictionsListDataArray = dictionary!
+                        self.allJurisdictionsListData = dictionary!
+                        self.tableViewSearch.reloadData()
+                    }
+                
+                }
+                else{
+                      
+                }
+            }
+        }
+        
         func GetStateListDataGet(_ isLoader:Bool, _ isAppend: Bool){
         
             StateListAPIRequest.shared.StateListAPI(requestParams:countryID, isLoader) { (message,status,dictionary) in
@@ -118,26 +138,38 @@ protocol CountriesSelectDelegate {
 
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int{
             
-            if countryID == 0 {
-                return searchData.count
+            if isJurisdictions{
+                
+                return jurisdictionsListDataArray.count
             }
-            return stateData.count
-           
+            else{
+                if countryID == 0 {
+                    return searchData.count
+                }
+                return stateData.count
+            }
+            return 0
         }
         
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
             
             let cell = tableView.dequeueReusableCell(withIdentifier: "CountriesTableCell") as! CountriesTableCell
-            
-            if countryID == 0 {
-                let data : CountriesListData = self.searchData[indexPath.row]
-                cell.lbeName.text = data.countryName
+            if isJurisdictions{
+                cell.lbeName.text = self.jurisdictionsListDataArray[indexPath.row].name
+
+                
+                
             }
             else{
-                let data : StateListData = self.stateData[indexPath.row]
-                cell.lbeName.text = data.cityName
+                if countryID == 0 {
+                    let data : CountriesListData = self.searchData[indexPath.row]
+                    cell.lbeName.text = data.countryName
+                }
+                else{
+                    let data : StateListData = self.stateData[indexPath.row]
+                    cell.lbeName.text = data.cityName
+                }
             }
-           
             return cell
         }
         
@@ -148,15 +180,24 @@ protocol CountriesSelectDelegate {
         func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath){
             tableView.deselectRow(at: indexPath, animated: true)
            
-               
-            if countryID == 0 {
-                let data : CountriesListData = self.searchData[indexPath.row]
-                delegate.chooseCountries(data.countryMasterId, data.countryName)
+            if isJurisdictions{
+                
+                
+                delegate.chooseState(self.jurisdictionsListDataArray[indexPath.row].id, self.jurisdictionsListDataArray[indexPath.row].name)
+
+                
+                
             }
             else{
-                let data : StateListData = self.stateData[indexPath.row]
-                delegate.chooseState(data.cityID, data.cityName)
-
+                if countryID == 0 {
+                    let data : CountriesListData = self.searchData[indexPath.row]
+                    delegate.chooseCountries(data.countryMasterId, data.countryName)
+                }
+                else{
+                    let data : StateListData = self.stateData[indexPath.row]
+                    delegate.chooseState(data.cityID, data.cityName)
+                    
+                }
             }
                 self.navigationController?.isNavigationBarHidden = true
                 self.navigationController?.popViewController(animated: true)
@@ -171,15 +212,20 @@ protocol CountriesSelectDelegate {
             
             let newText = (textField.text! as NSString).replacingCharacters(in: range, with: string)
 
-            
-            if countryID == 0 {
-              searchData = newText.isEmpty ? CountListData : CountListData.filter{ $0.countryName.range(of: newText, options: .caseInsensitive) != nil }
+            if isJurisdictions{
+                jurisdictionsListDataArray = newText.isEmpty ? allJurisdictionsListData : allJurisdictionsListData.filter{ $0.name.range(of: newText, options: .caseInsensitive) != nil }
 
+                
             }
             else{
-                stateData = newText.isEmpty ? stateListDataArray : stateListDataArray.filter{ $0.cityName.range(of: newText, options: .caseInsensitive) != nil }
+                if countryID == 0 {
+                    searchData = newText.isEmpty ? CountListData : CountListData.filter{ $0.countryName.range(of: newText, options: .caseInsensitive) != nil }
+                    
+                }
+                else{
+                    stateData = newText.isEmpty ? stateListDataArray : stateListDataArray.filter{ $0.cityName.range(of: newText, options: .caseInsensitive) != nil }
+                }
             }
-            
 
             tableViewSearch.reloadData()
 
@@ -373,8 +419,73 @@ class StateListData: NSObject {
     init(fromDictionary dictionary: [String:Any]){
         cityID = dictionary["stateId"] as? Int  ?? 0
         cityName = dictionary["stateName"] as? String ?? ""
+    }
+
+}
 
 
+class GetAllJurisdictionsAPIRequest: NSObject {
+    
+    static let shared = GetAllJurisdictionsAPIRequest()
+    
+    func JurisdictionsListAPI(requestParams : Int,_ isLoader:Bool, completion: @escaping (_ message : String?, _ status : Bool, _ dictionary : [JurisdictionsListData]?) -> Void) {
+        
+        var apiURL = String("".GetAllJurisdictions)
+
+        
+        print("URL---->> ",apiURL)
+        print("Request---->> ",requestParams)
+        
+        AlamofireRequest.shared.GetBodyFrom(urlString:apiURL, parameters: [:], authToken:nil, isLoader: isLoader, loaderMessage: "") { (data, error) in
+            
+            print("*************************************************")
+            print(data ?? "No data")
+            
+            if error == nil{
+                var messageString : String = ""
+                if let status = data?["statusCode"] as? Int{
+                    if let msg = data?["message"] as? String{
+                        messageString = msg
+                    }
+                    if status == 200 {
+                        var homeListObject : [JurisdictionsListData] = []
+                        if let dataList = data?["data"] as? NSArray{
+                            for list in dataList{
+                                let dict : JurisdictionsListData =   JurisdictionsListData.init(fromDictionary: list as! [String : Any])
+                                homeListObject.append(dict)
+                            }
+                            
+                            completion(messageString,true,homeListObject)
+                        }else{
+                            completion(messageString, false,nil)
+                        }
+                    }
+                    else
+                    {
+                        NotificationAlert().NotificationAlert(titles: GlobalConstants.serverError)
+                        completion(GlobalConstants.serverError, false,nil)
+                    }
+                }
+                else
+                {
+                    NotificationAlert().NotificationAlert(titles: GlobalConstants.serverError)
+                    completion(GlobalConstants.serverError, false,nil)
+                }
+            }
+        }
+    }
+    
+}
+
+
+class JurisdictionsListData: NSObject {
+    var id = 0
+    var name = "";
+
+
+    init(fromDictionary dictionary: [String:Any]){
+        id = dictionary["id"] as? Int  ?? 0
+        name = dictionary["name"] as? String ?? ""
     }
 
 }

@@ -10,7 +10,6 @@ import SVPinView
 
 class VerifiyViewController: UIViewController ,UITextFieldDelegate{
     @IBOutlet weak var pinViewPhone: SVPinView!
-    
     @IBOutlet weak var lbeTextTop: UILabel!
 
     
@@ -24,19 +23,16 @@ class VerifiyViewController: UIViewController ,UITextFieldDelegate{
     var stringPhoneNo = ""
     var stringEmail = ""
     var stringPassword = ""
-
     var stringGender = ""
     var phoneCode = ""
-    var img = UIImage()
     var imgIS = false
     var isForgot = false
-    
+    var img = UIImage()
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-       
-        
         lbeTextTop.text = String(format: "Please enter the 5-digit code sent to your %@", stringEmail)
         configurePhonePinView()
         
@@ -71,8 +67,6 @@ class VerifiyViewController: UIViewController ,UITextFieldDelegate{
     
     func callData(){
         
-       
-        
         self.view.endEditing(true)
         if enterCodeStr.trimmingCharacters(in: .whitespaces).count == 0 {
             NotificationAlert().NotificationAlert(titles: "Please enter verification code.")
@@ -84,24 +78,19 @@ class VerifiyViewController: UIViewController ,UITextFieldDelegate{
         }
         else{
             if isForgot {
-                
-                    
                 var param = [String : AnyObject]()
                 param["emailOrPhoneNumber"] = stringEmail as AnyObject
                 param["newPassword"] = stringPassword as AnyObject
-
-                    
-                    UserResetPasswordRequest.shared.ResetPasswordData(requestParams:param, true) { (message,isStatus) in
+                
+                UserResetPasswordRequest.shared.ResetPasswordData(requestParams:param, true) { (message,isStatus) in
                         if isStatus {
                             LoginMessageAlert(title: "Congratulation!", message: message ?? "Successfully")
                             }
                         else{
-                                NotificationAlert().NotificationAlert(titles: message ?? GlobalConstants.serverError)
-
+                            NotificationAlert().NotificationAlert(titles: message ?? GlobalConstants.serverError)
                             }
                         }
                     }
-            
             else{
                 SignUp_User()
             }

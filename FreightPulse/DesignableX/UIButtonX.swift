@@ -146,7 +146,7 @@ class UIButtonX: UIButton {
         let screenWidth = UIScreen.main.bounds.size.width
         var calculatedFontSize = screenWidth / 375 * FontSize
         if Utility.shared.DivceTypeString() == "IPad" {
-            calculatedFontSize = FontSize + 5.50
+            calculatedFontSize = FontSize + 5
         }
         else{
             calculatedFontSize = FontSize

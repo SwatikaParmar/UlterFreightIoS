@@ -111,7 +111,7 @@ class UpadteDocumentViewController: UIViewController {
         
     }
     func addPickerLicenseExpirationDate(){
-        let alert = UIAlertController(style: .alert, title: "Select Date")
+        let alert = UIAlertController(style: .alert, title: "Select License Expiration Date")
         alert.view.subviews.first?.subviews.first?.subviews.first?.backgroundColor = UIColor.white
         
         alert.setTitle(font: UIFont(name: FontName.Inter.Medium, size: 14)!, color: AppColor.AppThemeColor)
@@ -190,8 +190,6 @@ class UpadteDocumentViewController: UIViewController {
                      }
                      else{
                          self.showAlertWith(message ?? "Submit Successfully")
-
-
                      }
                  }
                  else
@@ -237,18 +235,13 @@ class UpadteDocumentViewController: UIViewController {
     func showAlertWith(_ message:String) {
         let alert = UIAlertController(title: "Success!", message: message, preferredStyle: .alert)
 
-          // Step 2: Add actions to the alert
-         
-
           let confirmAction = UIAlertAction(title: "OK", style: .default) { _ in
               RootControllerManager().SetRootViewController()
                
           }
 
-          // Step 3: Add the actions to the alert controller
           alert.addAction(confirmAction)
 
-          // Step 4: Present the alert
         self.present(alert, animated: true, completion: nil)
     }
     

@@ -17,7 +17,6 @@ struct Constants {
     static let userType = "userType"
     static let phoneNumber = "phoneNumber"
     static let phoneCode = "phoneCode"
-
     static let email = "email"
     static let name = "name"
     static let firstName = "firstName"
@@ -34,7 +33,11 @@ struct Constants {
     static let login = "LoginBool"
     static let stateName = "stateName"
 
+
 }
+
+public var typeDelivered = "PickedUp"
+
 
 public func accessToken() -> String
 {
@@ -89,13 +92,13 @@ struct GlobalConstants {
     static let FemalePlaceHolding: String = "placeholder_FeMale"
     static let OtherPlaceHolding: String = "placeholder_Male"
     
-    static let GoogleWebAPIKey = "AIzaSyBgLMQ8wvy5yda0qP1_8y1e_aJJ_HrTdZw"    
-    static let BASE_IMAGE_URL = "https://freight-pulse-file.s3.us-east-2.amazonaws.com/FileToSave/"
+   // static let GoogleWebAPIKey = "AIzaSyBgLMQ8wvy5yda0qP1_8y1e_aJJ_HrTdZw"
+    static let GoogleWebAPIKey = "AIzaSyCn4NaEzeh7g-qW7xtkYewa8xv7LI1cdwU"
+    static let BASE_IMAGE_URL = "https://portavoy.s3.us-east-2.amazonaws.com/"
 }
 extension String{
     
-    static let LiveBaseURL = "http://freightpulseapi-dev.us-east-2.elasticbeanstalk.com/api/"
-    static let LiveDevBaseURL = "http://freightpulseapi-dev.us-east-2.elasticbeanstalk.com/api/"
+    static let LiveBaseURL = "https://d12jvf41ix7qm4.cloudfront.net/api/"
     
     var path: String{
         return .LiveBaseURL
@@ -123,6 +126,10 @@ extension String{
         return "Path".path + "Content/GetStates"
     }
     
+    var GetAllJurisdictions: String{
+        return "Path".path + "Admin/GetAllJurisdictions"
+    }
+    
     var CountriesList: String{
         return "Path".path + "Content/GetCountries"
     }
@@ -142,8 +149,53 @@ extension String{
     var GetDriverDetail: String{
         return "Path".path + "Driver/GetDriverDetail"
     }
+    
     var UpdateDriverAvailability: String{
         return "Path".path + "Driver/UpdateDriverAvailability"
+    }
+    
+    var getNotificationList: String{
+        return "Path".path + "Notification/getNotificationList"
+    }
+    
+    var GetDriverDocuments: String{
+        return "Path".path + "Driver/GetDriverDocuments?driverId="
+    }
+    
+    var GetDriverLoads: String{
+        return "Path".path + "Driver/GetDriverLoads?driverId="
+    }
+    
+    var UpdateLoadTrackingStatus: String{
+        return "Path".path + "Carrier/UpdateLoadTrackingStatus"
+    }
+    
+    var GetFleetDetail: String{
+        return "Path".path + "Carrier/GetFleetDetail"
+    }
+    
+    var GetLoadDetails: String{
+        return "Path".path + "Shipper/GetLoadDetails"
+    }
+    
+    var AddOrUpdateFuelReceipt: String{
+        return "Path".path + "Driver/AddOrUpdateFuelReceipt"
+    }
+    
+    var GetFuelReceipts: String{
+        return "Path".path + "Driver/GetFuelReceipts?"
+    }
+    
+    var UploadFleetInsuranceCertificate: String{
+        return "Path".path + "Carrier/UploadFleetInsuranceCertificate"
+    }
+    
+    var AddUpdateFleet: String{
+        return "Path".path + "Carrier/AddUpdateFleet"
+    }
+    
+    var GetFleetList: String{
+        return "Path".path + "Carrier/GetFleetList"
     }
     
     

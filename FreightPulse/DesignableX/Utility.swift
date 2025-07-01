@@ -352,6 +352,39 @@ extension String {
         }
     }
     
+    func convertddMMMM(pickupDate:String,pickupTime:String)->String{
+        
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        if let datePart = dateFormatter.date(from: pickupDate) {
+            let timeComponents = pickupTime.split(separator: ":")
+            if let hour = Int(timeComponents[0]), let minute = Int(timeComponents[1]) {
+                var calendar = Calendar.current
+                var dateComponents = calendar.dateComponents([.year, .month, .day], from: datePart)
+                dateComponents.hour = hour
+                dateComponents.minute = minute
+                
+                if let fullDate = calendar.date(from: dateComponents) {
+                    let outputFormatter = DateFormatter()
+                    outputFormatter.dateFormat = "dd MMM''yy 'at' hh:mm a"
+                    outputFormatter.locale = Locale(identifier: "en_US_POSIX")
+                    
+                    let formattedDate = outputFormatter.string(from: fullDate)
+                    print(formattedDate)
+                    
+                    return formattedDate
+                }
+            }
+        }
+        
+        return pickupDate + " " + pickupTime
+
+    }
+    
+
     
     func heightForTableViewCell(text:String, font:UIFont, width:CGFloat) -> CGFloat{
         
@@ -406,48 +439,52 @@ extension String {
     
     func heightForView(text:String, font:UIFont, width:CGFloat) -> CGFloat{
         
-        let label = UILabel ()
-        label.frame = CGRect.init(x: 0, y: 0, width:width, height: CGFloat.greatestFiniteMagnitude)
-        label.numberOfLines = 0
-        label.lineBreakMode = NSLineBreakMode.byWordWrapping
-        label.font = font
-        label.text = self
-        label.sizeToFit()
-        
         let style = NSMutableParagraphStyle()
             style.lineSpacing = 0
             style.alignment = .center
-            label.attributedText = NSAttributedString(string: self, attributes: [NSAttributedString.Key.paragraphStyle: style])
-           
-           label.sizeToFit()
+
+            let attributes: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .paragraphStyle: style
+            ]
+            
+            let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
+            
+            let boundingBox = self.boundingRect(
+                with: constraintRect,
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                attributes: attributes,
+                context: nil
+            )
+            
+            print("Height>>> ",ceil(boundingBox.height) + 20)
+            return CGFloat(ceil(boundingBox.height) + 20)
         
-        let maxSize = CGSize(width:width, height: CGFloat(Float.infinity))
-        let charSize = font.lineHeight
-        let textSize = self.boundingRect(with: maxSize, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font: font], context: nil)
-        let linesRoundedUp = Int(ceil(textSize.height/charSize))
-        
-      //  print("LineNo-",linesRoundedUp)
-     //   print("textsize-",Int(charSize))
-     //   print("LINE-",CGFloat(linesRoundedUp * Int(charSize) + 20))
-        return CGFloat(linesRoundedUp * Int(charSize) + 20)
     }
     
     func lineCount(text:String, font:UIFont, width:CGFloat) -> CGFloat{
         
-        let label = UILabel ()
-        label.frame = CGRect.init(x: 0, y: 0, width:width, height: CGFloat.greatestFiniteMagnitude)
-        label.numberOfLines = 0
-        label.lineBreakMode = NSLineBreakMode.byWordWrapping
-        label.font = font
-        label.text = self
-        label.sizeToFit()
+          let style = NSMutableParagraphStyle()
+              style.alignment = .center
 
-        let maxSize = CGSize(width:width, height: CGFloat(Float.infinity))
-        let charSize = font.lineHeight
-        let textSize = self.boundingRect(with: maxSize, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font: font], context: nil)
-        
-        let linesRoundedUp = Int(ceil(textSize.height/charSize))
-        return CGFloat(linesRoundedUp)
+          let attributes: [NSAttributedString.Key: Any] = [
+              .font: font,
+              .paragraphStyle: style
+          ]
+
+          let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
+
+          let boundingBox = self.boundingRect(
+              with: constraintRect,
+              options: [.usesLineFragmentOrigin, .usesFontLeading],
+              attributes: attributes,
+              context: nil
+          )
+
+          let lineHeight = font.lineHeight
+          let lineCount = Int(ceil(boundingBox.height / lineHeight))
+          print("Line >>> ",lineCount)
+          return  CGFloat(lineCount)
     }
     
     

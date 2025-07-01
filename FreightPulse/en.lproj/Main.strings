@@ -1,0 +1,72 @@
+
+/* Class = "UILabel"; text = "Already have account?"; ObjectID = "1Ed-NH-z2X"; */
+"1Ed-NH-z2X.text" = "Already have account?";
+
+/* Class = "UIButton"; normalTitle = "Resend Code"; ObjectID = "27J-Gd-4Dk"; */
+"27J-Gd-4Dk.normalTitle" = "Resend Code";
+
+/* Class = "UILabel"; text = "Search"; ObjectID = "8cr-eW-6Qq"; */
+"8cr-eW-6Qq.text" = "Search";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "8ws-0M-k2a"; */
+"8ws-0M-k2a.normalTitle" = "Button";
+
+/* Class = "UILabel"; text = "Don’t recieve code?"; ObjectID = "GBD-6u-fg0"; */
+"GBD-6u-fg0.text" = "Don’t recieve code?";
+
+/* Class = "UILabel"; text = "Don't have an account?"; ObjectID = "JS7-AI-VtQ"; */
+"JS7-AI-VtQ.text" = "Don't have an account?";
+
+/* Class = "UILabel"; text = "Verification"; ObjectID = "Kqr-Bq-fFU"; */
+"Kqr-Bq-fFU.text" = "Verification";
+
+/* Class = "UIButton"; normalTitle = "Sign Up"; ObjectID = "KuO-YN-piE"; */
+"KuO-YN-piE.normalTitle" = "Sign Up";
+
+/* Class = "UILabel"; text = "My Comments"; ObjectID = "Meh-3H-lbm"; */
+"Meh-3H-lbm.text" = "My Comments";
+
+/* Class = "UILabel"; text = "Welcome Back!"; ObjectID = "NIB-dK-YG0"; */
+"NIB-dK-YG0.text" = "Welcome Back!";
+
+/* Class = "UILabel"; text = "Sign Up"; ObjectID = "Oft-ww-r8U"; */
+"Oft-ww-r8U.text" = "Sign Up";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "T0C-nx-09j"; */
+"T0C-nx-09j.normalTitle" = "Button";
+
+/* Class = "UITextField"; placeholder = "Search"; ObjectID = "YdK-sF-vGa"; */
+"YdK-sF-vGa.placeholder" = "Search";
+
+/* Class = "UILabel"; text = "Please enter 5 digit code sent to\nyouremail@gmail.com"; ObjectID = "e86-dV-gnD"; */
+"e86-dV-gnD.text" = "Please enter 5 digit code sent to\nyouremail@gmail.com";
+
+/* Class = "UIButton"; normalTitle = "Forgot Password?"; ObjectID = "fpp-ui-ChP"; */
+"fpp-ui-ChP.normalTitle" = "Forgot Password?";
+
+/* Class = "UILabel"; text = "OR"; ObjectID = "g0V-7A-pro"; */
+"g0V-7A-pro.text" = "OR";
+
+/* Class = "UIButton"; normalTitle = "Send OTP"; ObjectID = "iiL-sP-yP3"; */
+"iiL-sP-yP3.normalTitle" = "Send OTP";
+
+/* Class = "UILabel"; text = "Sign Up"; ObjectID = "l88-2d-OUz"; */
+"l88-2d-OUz.text" = "Sign Up";
+
+/* Class = "UILabel"; text = "Forgot Password"; ObjectID = "mG0-w2-cWZ"; */
+"mG0-w2-cWZ.text" = "Forgot Password";
+
+/* Class = "UILabel"; text = "Enter verification code"; ObjectID = "mbp-Af-DfL"; */
+"mbp-Af-DfL.text" = "Enter verification code";
+
+/* Class = "UIButton"; normalTitle = "Sign In"; ObjectID = "p9q-hS-My0"; */
+"p9q-hS-My0.normalTitle" = "Sign In";
+
+/* Class = "UILabel"; text = "Sign In"; ObjectID = "qPA-aS-x2M"; */
+"qPA-aS-x2M.text" = "Sign In";
+
+/* Class = "UIButton"; normalTitle = "Verify"; ObjectID = "r1o-9W-jWb"; */
+"r1o-9W-jWb.normalTitle" = "Verify";
+
+/* Class = "UILabel"; text = "Please sign in to continue"; ObjectID = "sj4-Zb-9jU"; */
+"sj4-Zb-9jU.text" = "Please sign in to continue";
